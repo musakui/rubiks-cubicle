@@ -6,6 +6,7 @@
     <h1>Rubik's Cubicle</h1>
     <a id="source" href="https://github.com/musakui/rubiks-cubicle" target="_blank" >Source</a>
   </header>
+  <CubeView :moves="answer" />
   <div id="board">
     <div v-for="(row, i) in board" :class="[
       'row',
@@ -30,6 +31,7 @@
 </template>
 
 <script setup>
+import CubeView from './Cube.vue'
 import LetterTile from './Tile.vue'
 import { reactive, onUnmounted } from 'vue'
 import { LETTERS, millis, range, dayIndex, answerChecker, getMoves } from './utils.js'
