@@ -4,7 +4,6 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { createCube } from './cube.js'
 import { millis } from './utils.js'
 
 let cube = null
@@ -13,6 +12,7 @@ const canvasEl = ref(null)
 const props = defineProps({ moves: Array })
 
 onMounted(async () => {
+  const { createCube } = await import('./cube.js')
   cube = createCube(canvasEl.value)
   for (const move of props.moves) {
     await cube.rotate(move.letter, move.mod ? (move.mod === '′' ? -1 : 2) : 1)

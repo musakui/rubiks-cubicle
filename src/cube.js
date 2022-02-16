@@ -6,12 +6,10 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode'
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial'
 
-import { Animation } from '@babylonjs/core/Animations/animation'
 import { BoxBuilder } from '@babylonjs/core/Meshes/Builders/boxBuilder'
 import { PlaneBuilder } from '@babylonjs/core/Meshes/Builders/planeBuilder'
 
 import '@babylonjs/core/Meshes/instancedMesh'
-import '@babylonjs/core/Animations/animatable'
 
 const THREE = [0, 1, 2]
 const HALF_PI = Math.PI / 2
@@ -94,6 +92,8 @@ export const createCube = (canvas) => {
     node.parent = mainNode
     for (const c of toRotate) c.setParent(node)
 
+    const { Animation } = await import('@babylonjs/core/Animations/animation')
+    await import('@babylonjs/core/Animations/animatable')
     await new Promise((resolve) => {
       Animation.CreateAndStartAnimation('', node, property, 60, frames, 0, angle, 0).onAnimationEnd = resolve
     })
