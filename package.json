@@ -1,0 +1,20 @@
+{
+  "name": "rubiks-cubicle",
+  "description": "Rubik's Cube x Wordle",
+  "author": "musakui",
+  "license": "MIT",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "preview": "vite preview",
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "vue": "^3.2.31"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.2.0",
+    "vite": "^2.8.2"
+  }
+}
