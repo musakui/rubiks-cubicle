@@ -3,27 +3,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { millis } from './utils.js'
+import { Engine } from '@babylonjs/core/Engines/engine'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
-let cube = null
+let scene = null
+let engine = null
+let rotate = null
 
 const canvasEl = ref(null)
-const props = defineProps({ moves: Array })
+const props = defineProps({ init: Array, moves: Array })
 
-onMounted(async () => {
-  const { createCube } = await import('./cube.js')
-  cube = createCube(canvasEl.value)
-  for (const move of props.moves) {
-    await cube.rotate(move.letter, move.mod ? (move.mod === '′' ? -1 : 2) : 1)
-  }
-  for (let i = 0; i < 100; ++i) {
-    await millis(5)
-    cube.lights(i / 100)
+onMounted(() => {
+  engine = new Engine(canvasEl.value, true)
+  Promise.all([
+    import('./scene.js'),
+    import('./geometry.js'),
+  ]).then(async ([{ createScene, createRotator }, { createCubies, animate }]) => {
+    scene = createScene(engine)
+    engine.runRenderLoop(() => scene.render())
+    const cubies = createCubies(scene)
+    rotate = createRotator(scene, cubies, animate)
+    for (const move of [...props.init].reverse()) {
+      await rotate(move.letter, move.mod ? (move.mod === '′' ? 1 : 2) : -1, 0)
+    }
+  })
+})
+
+watch(() => props.moves, async (val, oldval) => {
+  if (!rotate) return
+  if (val.length) {
+    for (const move of val) {
+      await rotate(move.letter, move.mod ? (move.mod === '′' ? -1 : 2) : 1, 16)
+    }
+  } else if (oldval.length) {
+    for (const move of [...oldval].reverse()) {
+      await rotate(move.letter, move.mod ? (move.mod === '′' ? 1 : 2) : -1, 5)
+    }
   }
 })
 
-onUnmounted(() => cube?.dispose())
+onUnmounted(() => engine?.dispose())
 </script>
 
 <style>

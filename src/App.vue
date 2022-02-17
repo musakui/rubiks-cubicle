@@ -2,7 +2,7 @@
   <Transition>
     <div class="message" v-if="state.message">{{ state.message }}</div>
   </Transition>
-  <CubeView :moves="answer" />
+  <CubeView :init="answer" :moves="state.show" />
   <div id="board">
     <div v-for="(row, i) in board" :class="[
       'row',
@@ -15,7 +15,7 @@
   <div id="keyboard">
     <div class="krow" v-for="(row, i) in KEYS">
       <div class="spacer" v-if="i === 1"></div>
-      <button v-for="key in row" v-bind="key.length > 1 && { 'class': 'big', 'aria-label': key }" @click="onKeyup({ key })">
+      <button v-for="key in row" v-bind="buttonProps(key)" @click="onKeyup(key)">
         <template v-if="key !== 'Backspace'">{{ key }}</template>
         <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24" width="24">
           <path :d="backspacePath" />
@@ -34,6 +34,7 @@ import { KEYS, millis, range, dayIndex, answerChecker, getMoves } from './utils.
 
 let allowInput = true
 
+const buttonProps = (key) => key.length > 1 && { 'class': 'big', 'aria-label': key }
 const successMessages = ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew']
 const backspacePath = `m22 3h-15c-1 0-1 0-2 1l-5 8 5 8c1 1 1 1 2 1h15c1 0 2-1 2-2v-14c0-1-1-2-2-2z
 m0 16h-15l-5-7 5-7h15v14zm-12-2 4-4 4 4 1-1-4-4 4-4-1-1-4 4-4-4-1 1 4 4-4 4z`
@@ -47,6 +48,7 @@ const state = reactive({
   shake: -1,
   done: false,
   message: '',
+  show: [],
 })
 
 const modTile = (mod) => {
@@ -76,21 +78,26 @@ const submit = async () => {
 
   allowInput = false
   const correct = checker(current)
-  await millis(1500)
+  state.show = current
 
   if (correct) {
+    await millis(1000)
     state.message = successMessages[state.cur]
     state.done = true
   } else if (state.cur < 5) {
+    await millis(2000)
     ++state.cur
+    state.show = []
     allowInput = true
   } else {
+    await millis(1500)
     state.message = answer.map((t) => `${t.letter}${t.mod}`).join(' ')
   }
 }
 
-const onKeyup = ({ key }) => {
+const onKeyup = (evt) => {
   if (!allowInput) return
+  const key = evt.key || evt
   switch (key) {
     case 'Enter':
       submit()
