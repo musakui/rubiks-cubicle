@@ -9,7 +9,8 @@ const mulberry32 = (seed) => () => {
 }
 
 const MODS = ['', '′', '²']
-export const LETTERS = [...'FBUDLR']
+const LETTERS = [...'FBUDLR']
+export const KEYS = [LETTERS, ['Enter', '′', '2', 'Backspace']]
 
 export const range = (length, fn) => Array.from({ length }, fn)
 export const millis = (delay) => new Promise((resolve) => setTimeout(resolve, delay))

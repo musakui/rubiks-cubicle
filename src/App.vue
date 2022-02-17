@@ -2,10 +2,6 @@
   <Transition>
     <div class="message" v-if="state.message">{{ state.message }}</div>
   </Transition>
-  <header>
-    <h1>Rubik's Cubicle</h1>
-    <a id="source" href="https://github.com/musakui/rubiks-cubicle" target="_blank" >Source</a>
-  </header>
   <CubeView :moves="answer" />
   <div id="board">
     <div v-for="(row, i) in board" :class="[
@@ -17,10 +13,10 @@
     </div>
   </div>
   <div id="keyboard">
-    <div class="krow" v-for="(row, i) in keyboard">
+    <div class="krow" v-for="(row, i) in KEYS">
       <div class="spacer" v-if="i === 1"></div>
-      <button v-for="key in row" :class="[key.length > 1 && 'big']" @click="onKeyup({ key })">
-        <span v-if="key !== 'Backspace'">{{ key }}</span>
+      <button v-for="key in row" v-bind="key.length > 1 && { 'class': 'big', 'aria-label': key }" @click="onKeyup({ key })">
+        <template v-if="key !== 'Backspace'">{{ key }}</template>
         <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24" width="24">
           <path :d="backspacePath" />
         </svg>
@@ -34,11 +30,10 @@
 import CubeView from './Cube.vue'
 import LetterTile from './Tile.vue'
 import { reactive, onUnmounted } from 'vue'
-import { LETTERS, millis, range, dayIndex, answerChecker, getMoves } from './utils.js'
+import { KEYS, millis, range, dayIndex, answerChecker, getMoves } from './utils.js'
 
 let allowInput = true
 
-const keyboard = [LETTERS, ['Enter', '′', '2', 'Backspace']]
 const successMessages = ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew']
 const backspacePath = `m22 3h-15c-1 0-1 0-2 1l-5 8 5 8c1 1 1 1 2 1h15c1 0 2-1 2-2v-14c0-1-1-2-2-2z
 m0 16h-15l-5-7 5-7h15v14zm-12-2 4-4 4 4 1-1-4-4 4-4-1-1-4 4-4-4-1 1 4 4-4 4z`
@@ -124,33 +119,6 @@ onUnmounted(() => window.removeEventListener('keyup', onKeyup))
 </script>
 
 <style>
-body {
-  font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
-  text-align: center;
-  max-width: 500px;
-  margin: 0px auto;
-}
-
-h1 {
-  margin: 4px 0;
-  font-size: 36px;
-}
-
-header {
-  border-bottom: 1px solid #ccc;
-  margin-bottom: 30px;
-  position: relative;
-}
-
-#source {
-  position: absolute;
-  right: 0.5em;
-  top: 0.25em;
-  color: #d3d6da;
-  padding: 0.5em;
-  border: 1px solid white;
-}
-
 .message {
   position: absolute;
   left: 50%;
