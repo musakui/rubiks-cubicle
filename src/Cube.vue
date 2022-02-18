@@ -6,7 +6,6 @@
 import { Engine } from '@babylonjs/core/Engines/engine'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
-let scene = null
 let engine = null
 let rotate = null
 
@@ -15,17 +14,15 @@ const props = defineProps({ init: Array, moves: Array })
 
 onMounted(() => {
   engine = new Engine(canvasEl.value, true)
-  Promise.all([
-    import('./scene.js'),
-    import('./geometry.js'),
-  ]).then(async ([{ createScene, createRotator }, { createCubies, animate }]) => {
-    scene = createScene(engine)
-    engine.runRenderLoop(() => scene.render())
-    const cubies = createCubies(scene)
-    rotate = createRotator(scene, cubies, animate)
+  import('./scene.js').then(async ({ createScene, init }) => {
+    const scene = createScene(engine)
+    const [createCamera, createRotate] = await init
+    rotate = createRotate(scene)
     for (const move of [...props.init].reverse()) {
       await rotate(move.letter, move.mod ? (move.mod === '′' ? 1 : 2) : -1, 0)
     }
+    createCamera(scene).attachControl(canvasEl.value, true)
+    engine.runRenderLoop(() => scene.render())
   })
 })
 

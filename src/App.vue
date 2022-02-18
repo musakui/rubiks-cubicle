@@ -64,28 +64,33 @@ const modTile = (mod) => {
   }
 }
 
+const shake = async (message = '') => {
+  state.message = message
+  state.shake = state.cur
+  await millis(1200)
+  allowInput = true
+  state.shake = -1
+  state.message = ''
+}
+
 const submit = async () => {
+  allowInput = false
   const current = board[state.cur]
 
-  if (!current.every((t) => t.letter)) {
-    allowInput = false
-    state.shake = state.cur
-    await millis(1000)
-    allowInput = true
-    state.shake = -1
-    return
+  if (!current.every((t) => t.letter)) return await shake()
+
+  if (current.slice(1).some((t, i) => t.letter === current[i].letter)) {
+    return await shake('Adjacent letters should be different')
   }
 
-  allowInput = false
-  const correct = checker(current)
   state.show = current
 
-  if (correct) {
+  if (checker(current)) {
     await millis(1000)
     state.message = successMessages[state.cur]
     state.done = true
   } else if (state.cur < 5) {
-    await millis(2000)
+    await millis(2500)
     ++state.cur
     state.show = []
     allowInput = true
