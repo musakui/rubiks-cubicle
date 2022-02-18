@@ -44,9 +44,8 @@ onUnmounted(() => engine?.dispose())
 
 <style>
 canvas {
-  --height: min(200px, calc(var(--vh, 100vh) - 310px));
-  height: var(--height);
-  width: min(350px, calc(var(--height) * 3 / 2));
+  width: 100%;
+  height: 100%;
   background-color: black;
 }
 </style>

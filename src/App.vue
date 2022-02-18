@@ -3,6 +3,28 @@
     <div class="message" v-if="state.message">{{ state.message }}</div>
   </Transition>
   <CubeView :init="answer" :moves="state.show" />
+  <button id="info" aria-label="help" @click="state.help = !state.help">?</button>
+  <Transition>
+    <div v-if="state.help" id="help">
+      Guess 5 moves to solve the cube.
+      <p>Moves are represented in Singmaster Notation where each letter represents a face.</p>
+      <div style="text-align:center">(U)p, (D)own, (F)ront, (B)ack, (L)eft, (R)ight</div>
+      <p>For simplicity, F is Blue and R is Orange for this cube.</p>
+      <p>
+      A given letter means the face should be turned clockwise 90&deg; (while facing it).
+      A prime mark (′) after the letter means it should be turned anti-clockwise 90&deg;,
+      and a square (²) means it should be turned 180&deg;
+      </p>
+      Colours:
+      <ul>
+        <li>Green: the move is in the correct spot</li>
+        <li>Blue: the face is correct but wrong amount of turning</li>
+        <li>Yellow: the face is used but in the wrong spot</li>
+        <li>Otherwise, the face is not used at all</li>
+      </ul>
+      Have fun!
+    </div>
+  </Transition>
   <div id="board">
     <div v-for="(row, i) in board" :class="[
       'row',
@@ -14,14 +36,12 @@
   </div>
   <div id="keyboard">
     <div class="krow" v-for="(row, i) in KEYS">
-      <div class="spacer" v-if="i === 1"></div>
       <button v-for="key in row" v-bind="buttonProps(key)" @click="onKeyup(key)">
         <template v-if="key !== 'Backspace'">{{ key }}</template>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24" width="24">
+        <svg v-else v-bind="svgSize" viewBox="0 -12 24 24">
           <path :d="backspacePath" />
         </svg>
       </button>
-      <div class="spacer" v-if="i === 1"></div>
     </div>
   </div>
 </template>
@@ -34,10 +54,10 @@ import { KEYS, millis, range, dayIndex, answerChecker, getMoves } from './utils.
 
 let allowInput = true
 
+const svgSize = { width: 24, height: 24 }
 const buttonProps = (key) => key.length > 1 && { 'class': 'big', 'aria-label': key }
 const successMessages = ['Genius', 'Magnificent', 'Impressive', 'Splendid', 'Great', 'Phew']
-const backspacePath = `m22 3h-15c-1 0-1 0-2 1l-5 8 5 8c1 1 1 1 2 1h15c1 0 2-1 2-2v-14c0-1-1-2-2-2z
-m0 16h-15l-5-7 5-7h15v14zm-12-2 4-4 4 4 1-1-4-4 4-4-1-1-4 4-4-4-1 1 4 4-4 4z`
+const backspacePath = `m0 0l5 7c1 1 1 1 2 1h14c1 0 2-1 2-2v-12c0-1-1-2-2-2h-14c-1 0-1 0-2 1zM9 4l8-8M9-4l8 8`
 
 const answer = getMoves(window.location.search.slice(1) || dayIndex)
 const checker = answerChecker(answer)
@@ -47,6 +67,7 @@ const state = reactive({
   cur: 0,
   shake: -1,
   done: false,
+  help: false,
   message: '',
   show: [],
 })
@@ -133,8 +154,8 @@ onUnmounted(() => window.removeEventListener('keyup', onKeyup))
 <style>
 .message {
   position: absolute;
+  top: 10%;
   left: 50%;
-  top: 80px;
   color: #fff;
   background-color: rgba(0, 0, 0, 0.85);
   padding: 16px 20px;
@@ -154,7 +175,7 @@ onUnmounted(() => window.removeEventListener('keyup', onKeyup))
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
-  --height: min(420px, calc(var(--vh, 100vh) - 310px));
+  --height: min(420px, calc(var(--vh, 100vh) - 50px));
   height: var(--height);
   width: min(350px, calc(var(--height) / 6 * 5));
   margin: 0px auto;
@@ -197,7 +218,7 @@ onUnmounted(() => window.removeEventListener('keyup', onKeyup))
 }
 
 #keyboard {
-  margin: 30px 8px 0;
+  margin: 20px 8px 0;
   user-select: none;
 }
 
@@ -207,32 +228,58 @@ onUnmounted(() => window.removeEventListener('keyup', onKeyup))
   margin: 0 auto 8px;
   touch-action: manipulation;
 }
-.spacer {
-  flex: 0.5;
-}
-button {
-  font-family: inherit;
+#keyboard button {
   font-weight: bold;
   border: 0;
-  padding: 0;
-  margin: 0 6px 0 0;
-  height: 58px;
+  height: 55px;
+  margin: 0 3px;
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
-  background-color: #d3d6da;
-  color: #1a1a1b;
+  color: #ccc;
+  background-color: #444;
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.3);
   transition: all 0.2s 1.5s;
-}
-button:last-of-type {
-  margin: 0;
 }
 button.big {
   flex: 1.5;
+}
+
+#info {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 30px;
+  height: 30px;
+  border: 1px #fff solid;
+  border-radius: 100%;
+  color: #ccc;
+  background-color: #111;
+  cursor: pointer;
+  user-select: none;
+}
+svg path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+#help {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.85);
+  padding: 16px 20px;
+  z-index: 2;
+  border-radius: 4px;
+  width: 80vw;
+  height: 50%;
+  overflow-y: auto;
+  transform: translateX(-50%);
+  transition: opacity 0.3s ease-out;
+}
+#help.v-leave-to, #help.v-enter-from {
+  opacity: 0;
 }
 </style>
