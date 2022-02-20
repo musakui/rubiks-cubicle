@@ -8,10 +8,12 @@ const mulberry32 = (seed) => () => {
   return ((t ^ t >>> 14) >>> 0) / int32
 }
 
-const MODS = ['', '′', '²']
 const LETTERS = [...'FBUDLR']
-export const KEYS = [LETTERS, ['Enter', '′', '2', 'Backspace']]
+export const PRIME = '′'
+export const SQUARE = '²'
+export const KEYS = [LETTERS, ['Enter', PRIME, '2', 'Backspace']]
 
+export const reverse = (arr) => [...arr].reverse()
 export const range = (length, fn) => Array.from({ length }, fn)
 export const millis = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 export const dayIndex = Math.floor((Date.now() - epoch) / 86400000)
@@ -26,10 +28,14 @@ export const getMoves = (seed) => {
     return r
   }
   const moves = []
-  let i, idx = null
+  let r, i, idx = null
   for (i = 0; i < 5; ++i) {
     idx = randExcept(idx, 6)
-    moves.push({ letter: LETTERS[idx], mod: MODS[randInt(3)] })
+    r = random()
+    moves.push({
+      letter: LETTERS[idx],
+      mod: r < 0.2 ? SQUARE : (r < 0.6 ? PRIME : ''),
+    })
   }
   return moves
 }

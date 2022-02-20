@@ -5,11 +5,13 @@
 <script setup>
 import { Engine } from '@babylonjs/core/Engines/engine'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { PRIME, reverse } from './utils.js'
 
 let engine = null
 let rotate = null
 
 const canvasEl = ref(null)
+const turn = (mod) => mod ? (mod === PRIME ? -1 : 2) : 1
 const props = defineProps({ init: Array, moves: Array })
 
 onMounted(() => {
@@ -18,8 +20,8 @@ onMounted(() => {
     const scene = createScene(engine)
     const [createCamera, createRotate] = await init
     rotate = createRotate(scene)
-    for (const move of [...props.init].reverse()) {
-      await rotate(move.letter, move.mod ? (move.mod === '′' ? 1 : 2) : -1, 0)
+    for (const move of reverse(props.init)) {
+      await rotate(move.letter, -turn(move.mod))
     }
     createCamera(scene).attachControl(canvasEl.value, true)
     engine.runRenderLoop(() => scene.render())
@@ -30,11 +32,11 @@ watch(() => props.moves, async (val, oldval) => {
   if (!rotate) return
   if (val.length) {
     for (const move of val) {
-      await rotate(move.letter, move.mod ? (move.mod === '′' ? -1 : 2) : 1, 16)
+      await rotate(move.letter, turn(move.mod), 16)
     }
   } else if (oldval.length) {
-    for (const move of [...oldval].reverse()) {
-      await rotate(move.letter, move.mod ? (move.mod === '′' ? 1 : 2) : -1, 5)
+    for (const move of reverse(oldval)) {
+      await rotate(move.letter, -turn(move.mod), 5)
     }
   }
 })

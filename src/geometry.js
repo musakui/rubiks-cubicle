@@ -10,7 +10,6 @@ import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera'
 import '@babylonjs/core/Meshes/instancedMesh'
 import '@babylonjs/core/Animations/animatable'
 
-const FACES = 'FBUDLR'
 const THREE = [-1, 0, 1]
 const HALF_PI = Math.PI / 2
 
@@ -85,7 +84,7 @@ export const createGeometry = (scene) => {
     const onFace = (c) => c.position.asArray().every((v, i) => !p[i] || p[i] === v)
     const node = new TransformNode('', scene)
     node.position.set(...p)
-    return [FACES[face], async (turn, frames = 0) => {
+    return ['FBUDLR'[face], async (turn, frames) => {
       if (!turn) return
       const angle = mult * turn
       const toRotate = cubies.filter(onFace)
@@ -105,5 +104,5 @@ export const createGeometry = (scene) => {
     }]
   }))
 
-  return (face, turn, frames) => core.get(face)?.(turn, frames)
+  return (face, turn, frames = 0) => core.get(face)?.(turn, frames)
 }

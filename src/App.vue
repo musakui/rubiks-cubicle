@@ -35,7 +35,7 @@
     </div>
   </div>
   <div id="keyboard">
-    <div class="krow" v-for="(row, i) in KEYS">
+    <div class="krow" v-for="row in KEYS">
       <button v-for="key in row" v-bind="buttonProps(key)" @click="onKeyup(key)">
         <template v-if="key !== 'Backspace'">{{ key }}</template>
         <svg v-else v-bind="svgSize" viewBox="0 -12 24 24">
@@ -50,7 +50,7 @@
 import CubeView from './Cube.vue'
 import LetterTile from './Tile.vue'
 import { reactive, onUnmounted } from 'vue'
-import { KEYS, millis, range, dayIndex, answerChecker, getMoves } from './utils.js'
+import { KEYS, SQUARE, PRIME, millis, range, reverse, dayIndex, answerChecker, getMoves } from './utils.js'
 
 let allowInput = true
 
@@ -73,7 +73,7 @@ const state = reactive({
 })
 
 const modTile = (mod) => {
-  for (const tile of [...board[state.cur]].reverse()) {
+  for (const tile of reverse(board[state.cur])) {
     if (!tile.letter) continue
     if (mod) {
       tile.mod = mod
@@ -110,6 +110,8 @@ const submit = async () => {
     await millis(1000)
     state.message = successMessages[state.cur]
     state.done = true
+    await millis(2000)
+    state.message = ''
   } else if (state.cur < 5) {
     await millis(2500)
     ++state.cur
@@ -117,7 +119,8 @@ const submit = async () => {
     allowInput = true
   } else {
     await millis(1500)
-    state.message = answer.map((t) => `${t.letter}${t.mod}`).join(' ')
+    const ans = answer.map((t) => `${t.letter}${t.mod}`).join(' ')
+    state.message = `Oops. It was ${ans}`
   }
 }
 
@@ -132,10 +135,10 @@ const onKeyup = (evt) => {
       modTile()
       break
     case '2':
-      modTile('²')
+      modTile(SQUARE)
       break
-    case '`': case '′': case "'":
-      modTile('′')
+    case '`': case "'": case PRIME:
+      modTile(PRIME)
       break
     default:
       if (!/^[bdflruBDFLRU]$/.test(key)) return
